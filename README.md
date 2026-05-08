@@ -16,27 +16,49 @@ An agentic coding assistant powered by local LLMs via Ollama. This extension pro
   - 💻 **Terminal**: Run commands directly in the integrated terminal.
 - **Model Awareness**: Automatically detects and uses your local Ollama models (prefers `deepseek-coder-v2`, `llama3.1`, etc.).
 
-## Prerequisites
+## 🚀 Getting Started
 
-1.  **Ollama**: Must be installed and running on your system. [Download Ollama](https://ollama.ai/).
-2.  **Models**: For best results, pull a coding-optimized model:
+Follow these steps to get the Ollama Agent running on your machine.
+
+### 1. Install Ollama
+Ollama is the engine that runs the AI models locally.
+- **Linux**: Run `curl -fsSL https://ollama.com/install.sh | sh`
+- **macOS**: [Download the App](https://ollama.com/download/Ollama-darwin.zip)
+- **Windows**: [Download the Preview](https://ollama.com/download/OllamaSetup.exe)
+- Verify installation by running `ollama --version` in your terminal.
+
+### 2. Download a Coding Model
+For an "agentic" experience, you need a model that understands code and tool-calling. We recommend:
+```bash
+# Recommended: High performance for coding
+ollama pull deepseek-coder-v2:16b
+
+# Alternative: Fast and lightweight
+ollama pull llama3.1:8b
+```
+*Note: Ensure Ollama is running (`ollama serve`) before pulling.*
+
+### 3. Clone and Setup the Extension
+1.  **Clone the repository**:
     ```bash
-    ollama pull deepseek-coder-v2:16b
-    # or
-    ollama pull llama3.1:8b
+    git clone https://github.com/AbdurRahim91/Ollama-Agent.git
+    cd Ollama-Agent
     ```
-
-## Installation
-
-### For Developers (Running from Source)
-
-1.  Clone this repository.
-2.  Install dependencies:
+2.  **Install dependencies**:
+    Make sure you have [Node.js](https://nodejs.org/) installed, then run:
     ```bash
     npm install
     ```
-3.  Open the project in VS Code.
-4.  Press `F5` to launch the "Extension Development Host".
+3.  **Open in VS Code**:
+    ```bash
+    code .
+    ```
+
+### 4. Run the Extension
+1.  Inside VS Code, press **F5** (or go to the **Run and Debug** sidebar and click the Play button).
+2.  A new window called **[Extension Development Host]** will open.
+3.  In this new window, look for the **Ollama Agent** icon (robot) in the Activity Bar on the left.
+4.  Start chatting with your local AI!
 
 ## Usage
 
