@@ -70,7 +70,28 @@ export async function deleteFile(filePath: string): Promise<string> {
         fs.unlinkSync(fullPath);
         return `Successfully deleted ${filePath}`;
     }
-    return `File ${filePath} does not exist`;
+    return `Error: File ${filePath} does not exist and could not be deleted. Check the path.`;
+}
+
+export async function moveFile(oldPath: string, newPath: string): Promise<string> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+        throw new Error('No workspace folder open');
+    }
+    const oldFullPath = path.isAbsolute(oldPath) ? oldPath : path.join(workspaceFolders[0].uri.fsPath, oldPath);
+    const newFullPath = path.isAbsolute(newPath) ? newPath : path.join(workspaceFolders[0].uri.fsPath, newPath);
+    
+    if (!fs.existsSync(oldFullPath)) {
+        return `Error: Source file ${oldPath} does not exist.`;
+    }
+
+    const dir = path.dirname(newFullPath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+
+    fs.renameSync(oldFullPath, newFullPath);
+    return `Successfully moved/renamed ${oldPath} to ${newPath}`;
 }
 
 export async function searchFiles(pattern: string): Promise<string[]> {

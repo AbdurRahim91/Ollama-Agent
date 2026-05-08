@@ -77,20 +77,20 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     
                     Available tools:
                     - readFile(filePath: string)
-                    - writeFile(filePath: string, content: string): Creates file and all parent folders automatically.
+                    - writeFile(filePath: string, content: string): Creates file and parent folders.
                     - deleteFile(filePath: string): Deletes a file.
+                    - moveFile(oldPath: string, newPath: string): Renames or moves a file. Use this for renames.
                     - createDirectory(dirPath: string): Creates a folder recursively.
-                    - listFiles(dirPath: string)
+                    - listFiles(dirPath: string): Lists files in a directory.
                     - runTerminalCommand(command: string): Use for npm install, git, etc.
                     - searchFiles(pattern: string)
-                    - getDiagnostics(): Returns all current errors and warnings in the workspace.
-                    - getActiveFileContent(): Returns the path and content of the file currently open in the editor.
+                    - getDiagnostics(): Returns all current errors/warnings.
+                    - getActiveFileContent(): Returns content of the current open file.
                     
-                    Important: You have "Full Access". If the user asks you to "fix errors", use getDiagnostics first. 
-                    If they say "fix this file", use getActiveFileContent.
-                    To rename a file, writeFile the new one and then deleteFile the old one.
-                    
-                    Always follow best practices for web development.` 
+                    Important: You have "Full Access". 
+                    - Before renaming or deleting, use listFiles or searchFiles to verify the exact path.
+                    - To rename a file, use the moveFile tool.
+                    - Follow best practices for web development.` 
                 });
             }
 
@@ -134,6 +134,8 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                             result = await tools.writeFile(toolCall.args.filePath, toolCall.args.content);
                         } else if (toolCall.tool === 'deleteFile') {
                             result = await tools.deleteFile(toolCall.args.filePath);
+                        } else if (toolCall.tool === 'moveFile') {
+                            result = await tools.moveFile(toolCall.args.oldPath, toolCall.args.newPath);
                         } else if (toolCall.tool === 'createDirectory') {
                             result = await tools.createDirectory(toolCall.args.dirPath);
                         } else if (toolCall.tool === 'listFiles') {
