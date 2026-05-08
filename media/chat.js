@@ -36,9 +36,11 @@
         const text = userInput.value.trim();
         const model = modelSelect.value;
         if (text) {
+            addMessage('user', text);
             setLoading(true);
             vscode.postMessage({ type: 'sendMessage', value: text, model: model });
             userInput.value = '';
+            userInput.style.height = 'auto';
         }
     });
 

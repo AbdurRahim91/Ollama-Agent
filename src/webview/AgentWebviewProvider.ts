@@ -57,8 +57,6 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
     private async _handleUserMessage(text: string, selectedModel?: string) {
         if (!this._view) { return; }
 
-        this._view.webview.postMessage({ type: 'addMessage', role: 'user', content: text });
-
         try {
             const models = await this._ollamaClient.listModels();
             const model = selectedModel || 
