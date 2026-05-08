@@ -67,32 +67,36 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
             if (this._messages.length === 0) {
                 this._messages.push({ 
                     role: 'system', 
-                    content: `You are an agentic coding assistant in VS Code. 
-                    You have access to tools. To use a tool, respond with a JSON object like this:
-                    {"tool": "readFile", "args": {"filePath": "src/extension.ts"}}
+                    content: `You are an expert Full Stack Web Developer Agent. Your goal is to build, debug, and manage web projects. 
+                    You have full access to the file system and terminal. You should be proactive and autonomous.
+                    
+                    When asked to build a project, create all necessary files and folders systematically.
+                    
+                    To use a tool, respond ONLY with a JSON object:
+                    {"tool": "writeFile", "args": {"filePath": "src/App.js", "content": "..."}}
                     
                     Available tools:
                     - readFile(filePath: string)
-                    - writeFile(filePath: string, content: string)
+                    - writeFile(filePath: string, content: string): Creates file and all parent folders automatically.
+                    - createDirectory(dirPath: string): Creates a folder recursively.
                     - listFiles(dirPath: string)
-                    - runTerminalCommand(command: string)
+                    - runTerminalCommand(command: string): Use for npm install, git, etc.
                     - searchFiles(pattern: string)
                     
-                    If you don't need a tool, just respond with text.` 
+                    Always follow best practices for web development.` 
                 });
             }
 
             this._messages.push({ role: 'user', content: text });
 
             let iterations = 0;
-            const maxIterations = 5;
+            const maxIterations = 10; // Increased for complex full-stack tasks
 
             while (iterations < maxIterations) {
                 const response = await this._ollamaClient.chat(model, this._messages);
                 this._messages.push({ role: 'assistant', content: response });
 
                 try {
-                    // Try to extract JSON from markdown code blocks if present
                     let jsonStr = response.trim();
                     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
                     if (jsonMatch) {
@@ -101,13 +105,15 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
 
                     const toolCall = JSON.parse(jsonStr);
                     if (toolCall.tool) {
-                        this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `Using tool: ${toolCall.tool}...` });
+                        this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `[Tool] ${toolCall.tool}: ${JSON.stringify(toolCall.args)}` });
                         
                         let result: any;
                         if (toolCall.tool === 'readFile') {
                             result = await tools.readFile(toolCall.args.filePath);
                         } else if (toolCall.tool === 'writeFile') {
                             result = await tools.writeFile(toolCall.args.filePath, toolCall.args.content);
+                        } else if (toolCall.tool === 'createDirectory') {
+                            result = await tools.createDirectory(toolCall.args.dirPath);
                         } else if (toolCall.tool === 'listFiles') {
                             result = await tools.listFiles(toolCall.args.dirPath);
                         } else if (toolCall.tool === 'runTerminalCommand') {
@@ -121,7 +127,7 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                         continue;
                     }
                 } catch (e) {
-                    // Not a tool call or invalid JSON, treat as final response
+                    // Final response
                 }
 
                 this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: response });

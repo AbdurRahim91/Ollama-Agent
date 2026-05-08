@@ -17,8 +17,28 @@ export async function writeFile(filePath: string, content: string): Promise<stri
         throw new Error('No workspace folder open');
     }
     const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspaceFolders[0].uri.fsPath, filePath);
+    
+    // Ensure directory exists
+    const dir = path.dirname(fullPath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+
     fs.writeFileSync(fullPath, content, 'utf8');
     return `Successfully wrote to ${filePath}`;
+}
+
+export async function createDirectory(dirPath: string): Promise<string> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+        throw new Error('No workspace folder open');
+    }
+    const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(workspaceFolders[0].uri.fsPath, dirPath);
+    
+    if (!fs.existsSync(fullPath)) {
+        fs.mkdirSync(fullPath, { recursive: true });
+    }
+    return `Successfully created directory ${dirPath}`;
 }
 
 export async function listFiles(dirPath = '.'): Promise<string[]> {
