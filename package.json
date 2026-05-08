@@ -11,6 +11,19 @@
     "AI",
     "Programming Languages"
   ],
+  "publisher": "AbdurRahim91",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AbdurRahim91/Ollama-Agent.git"
+  },
+  "keywords": [
+    "AI",
+    "Agent",
+    "Ollama",
+    "Llama",
+    "Coding Assistant",
+    "Local LLM"
+  ],
   "activationEvents": [
     "onView:ollama-agent-view"
   ],

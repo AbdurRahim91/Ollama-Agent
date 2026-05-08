@@ -1,5 +1,8 @@
 # Ollama Agent for VS Code
 
+[![GitHub](https://img.shields.io/github/license/AbdurRahim91/Ollama-Agent)](https://github.com/AbdurRahim91/Ollama-Agent/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/AbdurRahim91/Ollama-Agent)](https://github.com/AbdurRahim91/Ollama-Agent/stargazers)
+
 An agentic coding assistant powered by local LLMs via Ollama. This extension provides a sidebar chat interface where an AI agent can autonomously explore your workspace, read/write files, and execute terminal commands.
 
 ## Features
@@ -55,6 +58,10 @@ The extension currently defaults to `http://localhost:11434`. Ensure your Ollama
 - **Backend**: TypeScript-based VS Code extension.
 - **Communication**: Axios for Ollama API interaction.
 - **Bundling**: `esbuild` for near-instant builds.
+
+## Contributing
+
+Contributions are welcome! If you have ideas for new tools or improvements, feel free to open an issue or submit a pull request on [GitHub](https://github.com/AbdurRahim91/Ollama-Agent).
 
 ## Publishing
 
