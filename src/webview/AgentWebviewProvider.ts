@@ -92,7 +92,14 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                 this._messages.push({ role: 'assistant', content: response });
 
                 try {
-                    const toolCall = JSON.parse(response);
+                    // Try to extract JSON from markdown code blocks if present
+                    let jsonStr = response.trim();
+                    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                    if (jsonMatch) {
+                        jsonStr = jsonMatch[1];
+                    }
+
+                    const toolCall = JSON.parse(jsonStr);
                     if (toolCall.tool) {
                         this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `Using tool: ${toolCall.tool}...` });
                         
