@@ -60,6 +60,24 @@ ollama pull llama3.1:8b
 3.  In this new window, look for the **Ollama Agent** icon (robot) in the Activity Bar on the left.
 4.  Start chatting with your local AI!
 
+## 📦 Manual Installation (The Professional Way)
+
+If you want to install the extension permanently in your VS Code:
+
+1.  **Install the packaging tool**:
+    ```bash
+    npm install -g @vscode/vsce
+    ```
+2.  **Package the extension**:
+    ```bash
+    vsce package
+    ```
+    *This will create a file named `ollama-agent-0.0.1.vsix` in your folder.*
+3.  **Install it in VS Code**:
+    - Open VS Code.
+    - Press `Ctrl+Shift+P` and type **"Install from VSIX"**.
+    - Select the `ollama-agent-0.0.1.vsix` file.
+
 ## Usage
 
 1.  Open the **Ollama Agent** view from the Activity Bar.
