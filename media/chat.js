@@ -64,6 +64,9 @@
         const message = event.data;
         switch (message.type) {
             case 'addMessage':
+                if (message.role === 'user') {
+                    return; // Already added locally
+                }
                 if (message.role === 'assistant') {
                     setLoading(false);
                 }
