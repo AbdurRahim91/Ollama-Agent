@@ -85,56 +85,51 @@ body {
 }
 
 #input-container {
-    padding: 16px;
+    padding: 12px;
     border-top: 1px solid var(--vscode-panel-border);
     background-color: var(--vscode-sideBar-background);
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-end;
 }
 
 #user-input {
-    width: 100%;
-    min-height: 44px;
+    flex: 1;
+    min-height: 36px;
     max-height: 200px;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
     border: 1px solid var(--vscode-input-border);
-    border-radius: 10px;
-    padding: 12px;
+    border-radius: 6px;
+    padding: 8px 12px;
     resize: none;
     font-family: inherit;
     font-size: 13px;
     line-height: 1.4;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease;
 }
 
 #user-input:focus {
     outline: none;
     border-color: var(--vscode-focusBorder);
-    box-shadow: 0 0 0 2px rgba(var(--vscode-focusBorder-rgb), 0.2);
 }
 
 #send-button {
-    align-self: flex-end;
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border: none;
-    padding: 8px 20px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
     font-size: 12px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    height: 36px;
+    transition: background-color 0.2s ease;
 }
 
 #send-button:hover:not(:disabled) {
     background-color: var(--vscode-button-hoverBackground);
-    transform: translateY(-1px);
 }
 
 #send-button:disabled {
@@ -144,11 +139,17 @@ body {
 
 /* Loading Animation */
 .loading-message {
-    font-style: italic;
-    opacity: 0.8;
-    display: flex;
+    padding: 10px 14px;
+    font-style: normal;
+    opacity: 1;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 12px;
+    border-bottom-left-radius: 2px;
+    margin-bottom: 8px;
 }
 
 .loading-dots {

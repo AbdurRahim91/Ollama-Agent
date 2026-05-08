@@ -20,8 +20,8 @@
         if (isLoading) {
             const loadingDiv = document.createElement('div');
             loadingDiv.id = 'loading-indicator';
-            loadingDiv.className = 'message assistant-message loading-message';
-            loadingDiv.innerHTML = `Please wait <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            loadingDiv.className = 'loading-message';
+            loadingDiv.innerHTML = `<span>Thinking</span> <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
             messagesContainer.appendChild(loadingDiv);
         } else {
             const loadingDiv = document.getElementById('loading-indicator');
