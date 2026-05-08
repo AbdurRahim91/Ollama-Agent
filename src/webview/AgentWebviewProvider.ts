@@ -125,8 +125,6 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     }
 
                     if (toolCall && toolCall.tool) {
-                        this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `[Tool] ${toolCall.tool}: ${JSON.stringify(toolCall.args)}` });
-                        
                         let result: any;
                         if (toolCall.tool === 'readFile') {
                             result = await tools.readFile(toolCall.args.filePath);
