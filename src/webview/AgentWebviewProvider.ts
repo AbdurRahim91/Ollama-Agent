@@ -83,8 +83,12 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     - listFiles(dirPath: string)
                     - runTerminalCommand(command: string): Use for npm install, git, etc.
                     - searchFiles(pattern: string)
+                    - getDiagnostics(): Returns all current errors and warnings in the workspace.
+                    - getActiveFileContent(): Returns the path and content of the file currently open in the editor.
                     
-                    Important: To rename a file, you must first writeFile the new file and then deleteFile the old one.
+                    Important: You have "Full Access". If the user asks you to "fix errors", use getDiagnostics first. 
+                    If they say "fix this file", use getActiveFileContent.
+                    To rename a file, writeFile the new one and then deleteFile the old one.
                     
                     Always follow best practices for web development.` 
                 });
@@ -93,7 +97,7 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
             this._messages.push({ role: 'user', content: text });
 
             let iterations = 0;
-            const maxIterations = 10; // Increased for complex full-stack tasks
+            const maxIterations = 10; 
 
             while (iterations < maxIterations) {
                 const response = await this._ollamaClient.chat(model, this._messages);
@@ -138,6 +142,10 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                             result = await tools.runTerminalCommand(toolCall.args.command);
                         } else if (toolCall.tool === 'searchFiles') {
                             result = await tools.searchFiles(toolCall.args.pattern);
+                        } else if (toolCall.tool === 'getDiagnostics') {
+                            result = await tools.getDiagnostics();
+                        } else if (toolCall.tool === 'getActiveFileContent') {
+                            result = await tools.getActiveFileContent();
                         }
 
                         this._messages.push({ role: 'user', content: `Tool result: ${JSON.stringify(result)}` });

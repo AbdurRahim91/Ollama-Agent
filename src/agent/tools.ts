@@ -77,3 +77,27 @@ export async function searchFiles(pattern: string): Promise<string[]> {
     const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**', 10);
     return files.map(f => vscode.workspace.asRelativePath(f));
 }
+
+export async function getDiagnostics(): Promise<string> {
+    const diagnostics = vscode.languages.getDiagnostics();
+    let result = '';
+    for (const [uri, diagArray] of diagnostics) {
+        for (const diag of diagArray) {
+            if (diag.severity === vscode.DiagnosticSeverity.Error || diag.severity === vscode.DiagnosticSeverity.Warning) {
+                result += `File: ${vscode.workspace.asRelativePath(uri)}\nLine: ${diag.range.start.line + 1}\nMessage: ${diag.message}\n\n`;
+            }
+        }
+    }
+    return result || 'No errors or warnings found.';
+}
+
+export async function getActiveFileContent(): Promise<{ filePath: string, content: string } | string> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        return 'No active editor found.';
+    }
+    return {
+        filePath: vscode.workspace.asRelativePath(editor.document.uri),
+        content: editor.document.getText()
+    };
+}
