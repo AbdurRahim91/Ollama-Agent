@@ -1,0 +1,8 @@
+.vscode/**
+.gitignore
+.eslintrc.json
+tsconfig.json
+src/**
+node_modules/**
+publish-guide.md
+ollama-agent-*.vsix
