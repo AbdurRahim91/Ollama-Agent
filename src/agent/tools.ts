@@ -59,6 +59,20 @@ export async function runTerminalCommand(command: string): Promise<string> {
     });
 }
 
+export async function deleteFile(filePath: string): Promise<string> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+        throw new Error('No workspace folder open');
+    }
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspaceFolders[0].uri.fsPath, filePath);
+    
+    if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+        return `Successfully deleted ${filePath}`;
+    }
+    return `File ${filePath} does not exist`;
+}
+
 export async function searchFiles(pattern: string): Promise<string[]> {
     const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**', 10);
     return files.map(f => vscode.workspace.asRelativePath(f));

@@ -78,10 +78,13 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     Available tools:
                     - readFile(filePath: string)
                     - writeFile(filePath: string, content: string): Creates file and all parent folders automatically.
+                    - deleteFile(filePath: string): Deletes a file.
                     - createDirectory(dirPath: string): Creates a folder recursively.
                     - listFiles(dirPath: string)
                     - runTerminalCommand(command: string): Use for npm install, git, etc.
                     - searchFiles(pattern: string)
+                    
+                    Important: To rename a file, you must first writeFile the new file and then deleteFile the old one.
                     
                     Always follow best practices for web development.` 
                 });
@@ -98,13 +101,10 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
 
                 try {
                     let jsonStr = response.trim();
-                    
-                    // 1. Try to find JSON within triple backticks
                     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
                     if (jsonMatch) {
                         jsonStr = jsonMatch[1];
                     } else {
-                        // 2. If no backticks, try to find the first '{' and last '}'
                         const start = jsonStr.indexOf('{');
                         const end = jsonStr.lastIndexOf('}');
                         if (start !== -1 && end !== -1) {
@@ -112,14 +112,10 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                         }
                     }
 
-                    // 3. Basic cleanup for common LLM JSON mistakes (like literal newlines)
-                    // We only want to escape newlines that are NOT already escaped
-                    // This is tricky, so we'll try parsing first, then fallback to cleanup
                     let toolCall;
                     try {
                         toolCall = JSON.parse(jsonStr);
                     } catch (err) {
-                        // Attempt to fix common literal newline issues in JSON strings
                         const fixedJson = jsonStr.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
                         toolCall = JSON.parse(fixedJson);
                     }
@@ -132,6 +128,8 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                             result = await tools.readFile(toolCall.args.filePath);
                         } else if (toolCall.tool === 'writeFile') {
                             result = await tools.writeFile(toolCall.args.filePath, toolCall.args.content);
+                        } else if (toolCall.tool === 'deleteFile') {
+                            result = await tools.deleteFile(toolCall.args.filePath);
                         } else if (toolCall.tool === 'createDirectory') {
                             result = await tools.createDirectory(toolCall.args.dirPath);
                         } else if (toolCall.tool === 'listFiles') {
