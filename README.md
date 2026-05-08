@@ -9,12 +9,13 @@ An agentic coding assistant powered by local LLMs via Ollama. This extension pro
 
 - **Local-First**: Runs entirely on your machine. No API keys or internet connection required (other than Ollama).
 - **Agentic Capabilities**: The AI can use tools to interact with your code, not just talk about it.
-- 🤖 **Agentic Capabilities**: Autonomous file reading, writing, searching, and terminal execution.
-- 🎨 **Premium UI**: Modern sidebar interface with smooth animations, auto-expanding input, and responsive design.
-- 🧠 **Conversation History**: Remembers context within the current session for smarter interactions.
-- 🔌 **Local LLMs**: Powered by Ollama—your data never leaves your machine.
-- 🎯 **Model Selection**: Easily switch between installed Ollama models directly from the sidebar.
-- 💻 **Terminal**: Run commands directly in the integrated terminal.
+- 🤖 **Full Stack Agent**: Expert developer persona that proactively manages project structures.
+- 📂 **Smart File System**: Automatically creates missing parent directories when writing files.
+- 📁 **Recursive Folders**: Dedicated tool for recursive directory creation.
+- 🎨 **Premium UI**: Modern sidebar with thinking animations and real-time tool execution indicators.
+- 🧠 **Conversation History**: Persists context for complex, multi-step development tasks.
+- 🔌 **Local & Private**: Powered by Ollama—no data ever leaves your machine.
+- 🎯 **Model Selector**: Switch between local LLMs (Llama 3, DeepSeek, etc.) on the fly.
 
 ## 🚀 Getting Started
 
