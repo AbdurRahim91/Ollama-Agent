@@ -6,6 +6,7 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'ollama-agent-view';
     private _view?: vscode.WebviewView;
     private _ollamaClient: OllamaClient;
+    private _messages: any[] = [];
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -45,6 +46,10 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     webviewView.webview.postMessage({ type: 'setModels', models });
                     break;
                 }
+                case 'clearChat': {
+                    this._messages = [];
+                    break;
+                }
             }
         });
     }
@@ -61,8 +66,8 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                           models.includes('llama3.1:8b') ? 'llama3.1:8b' : 
                           models[0] || 'llama3');
 
-            const messages = [
-                { 
+            if (this._messages.length === 0) {
+                this._messages.push({ 
                     role: 'system', 
                     content: `You are an agentic coding assistant in VS Code. 
                     You have access to tools. To use a tool, respond with a JSON object like this:
@@ -76,16 +81,17 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                     - searchFiles(pattern: string)
                     
                     If you don't need a tool, just respond with text.` 
-                },
-                { role: 'user', content: text }
-            ];
+                });
+            }
+
+            this._messages.push({ role: 'user', content: text });
 
             let iterations = 0;
             const maxIterations = 5;
 
             while (iterations < maxIterations) {
-                const response = await this._ollamaClient.chat(model, messages);
-                messages.push({ role: 'assistant', content: response });
+                const response = await this._ollamaClient.chat(model, this._messages);
+                this._messages.push({ role: 'assistant', content: response });
 
                 try {
                     const toolCall = JSON.parse(response);
@@ -105,7 +111,7 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
                             result = await tools.searchFiles(toolCall.args.pattern);
                         }
 
-                        messages.push({ role: 'user', content: `Tool result: ${JSON.stringify(result)}` });
+                        this._messages.push({ role: 'user', content: `Tool result: ${JSON.stringify(result)}` });
                         iterations++;
                         continue;
                     }

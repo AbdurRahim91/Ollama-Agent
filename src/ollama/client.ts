@@ -20,10 +20,15 @@ export class OllamaClient {
                 model,
                 messages,
                 stream: false
+            }, {
+                timeout: 120000 // 2 minutes timeout for large model loading
             });
             return response.data.message.content;
         } catch (error: any) {
             console.error('Ollama chat error:', error);
+            if (error.code === 'ECONNABORTED') {
+                throw new Error(`Ollama timed out. The model might be too large or still loading.`);
+            }
             throw new Error(`Failed to communicate with Ollama: ${error.message}`);
         }
     }
