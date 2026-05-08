@@ -14,10 +14,29 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
+    function setLoading(isLoading) {
+        sendButton.disabled = isLoading;
+        userInput.disabled = isLoading;
+        if (isLoading) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.className = 'message assistant-message loading-message';
+            loadingDiv.innerHTML = `Please wait <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            messagesContainer.appendChild(loadingDiv);
+        } else {
+            const loadingDiv = document.getElementById('loading-indicator');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
     sendButton.addEventListener('click', () => {
         const text = userInput.value.trim();
         const model = modelSelect.value;
         if (text) {
+            setLoading(true);
             vscode.postMessage({ type: 'sendMessage', value: text, model: model });
             userInput.value = '';
         }
@@ -25,6 +44,11 @@
 
     refreshModels.addEventListener('click', () => {
         vscode.postMessage({ type: 'refreshModels' });
+    });
+
+    userInput.addEventListener('input', () => {
+        userInput.style.height = 'auto';
+        userInput.style.height = userInput.scrollHeight + 'px';
     });
 
     userInput.addEventListener('keydown', (e) => {
@@ -38,6 +62,9 @@
         const message = event.data;
         switch (message.type) {
             case 'addMessage':
+                if (message.role === 'assistant') {
+                    setLoading(false);
+                }
                 addMessage(message.role, message.content);
                 break;
             case 'setModels':
