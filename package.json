@@ -1,0 +1,65 @@
+{
+  "name": "ollama-agent",
+  "displayName": "Ollama Agent",
+  "description": "Agentic coding assistant powered by Ollama",
+  "icon": "icon.png",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "AI",
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onView:ollama-agent-view"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ollama-agent-sidebar",
+          "title": "Ollama Agent",
+          "icon": "$(robot)"
+        }
+      ]
+    },
+    "views": {
+      "ollama-agent-sidebar": [
+        {
+          "type": "webview",
+          "id": "ollama-agent-view",
+          "name": "Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ollama-agent.focus",
+        "title": "Focus Ollama Agent"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.3",
+    "esbuild": "^0.16.7"
+  },
+  "dependencies": {
+    "axios": "^1.3.4"
+  }
+}

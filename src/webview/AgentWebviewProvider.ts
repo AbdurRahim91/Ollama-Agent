@@ -1,0 +1,138 @@
+import * as vscode from 'vscode';
+import { OllamaClient } from '../ollama/client';
+import * as tools from '../agent/tools';
+
+export class AgentWebviewProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'ollama-agent-view';
+    private _view?: vscode.WebviewView;
+    private _ollamaClient: OllamaClient;
+
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+    ) {
+        this._ollamaClient = new OllamaClient();
+    }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        _context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [
+                this._extensionUri
+            ]
+        };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        webviewView.webview.onDidReceiveMessage(async (data) => {
+            switch (data.type) {
+                case 'sendMessage': {
+                    await this._handleUserMessage(data.value);
+                    break;
+                }
+            }
+        });
+    }
+
+    private async _handleUserMessage(text: string) {
+        if (!this._view) { return; }
+
+        this._view.webview.postMessage({ type: 'addMessage', role: 'user', content: text });
+
+        try {
+            const models = await this._ollamaClient.listModels();
+            const model = models.includes('deepseek-coder-v2:16b') ? 'deepseek-coder-v2:16b' : 
+                          models.includes('llama3.1:8b') ? 'llama3.1:8b' : 
+                          models[0] || 'llama3';
+
+            const messages = [
+                { 
+                    role: 'system', 
+                    content: `You are an agentic coding assistant in VS Code. 
+                    You have access to tools. To use a tool, respond with a JSON object like this:
+                    {"tool": "readFile", "args": {"filePath": "src/extension.ts"}}
+                    
+                    Available tools:
+                    - readFile(filePath: string)
+                    - writeFile(filePath: string, content: string)
+                    - listFiles(dirPath: string)
+                    - runTerminalCommand(command: string)
+                    - searchFiles(pattern: string)
+                    
+                    If you don't need a tool, just respond with text.` 
+                },
+                { role: 'user', content: text }
+            ];
+
+            let iterations = 0;
+            const maxIterations = 5;
+
+            while (iterations < maxIterations) {
+                const response = await this._ollamaClient.chat(model, messages);
+                messages.push({ role: 'assistant', content: response });
+
+                try {
+                    const toolCall = JSON.parse(response);
+                    if (toolCall.tool) {
+                        this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `Using tool: ${toolCall.tool}...` });
+                        
+                        let result: any;
+                        if (toolCall.tool === 'readFile') {
+                            result = await tools.readFile(toolCall.args.filePath);
+                        } else if (toolCall.tool === 'writeFile') {
+                            result = await tools.writeFile(toolCall.args.filePath, toolCall.args.content);
+                        } else if (toolCall.tool === 'listFiles') {
+                            result = await tools.listFiles(toolCall.args.dirPath);
+                        } else if (toolCall.tool === 'runTerminalCommand') {
+                            result = await tools.runTerminalCommand(toolCall.args.command);
+                        } else if (toolCall.tool === 'searchFiles') {
+                            result = await tools.searchFiles(toolCall.args.pattern);
+                        }
+
+                        messages.push({ role: 'user', content: `Tool result: ${JSON.stringify(result)}` });
+                        iterations++;
+                        continue;
+                    }
+                } catch (e) {
+                    // Not a tool call or invalid JSON, treat as final response
+                }
+
+                this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: response });
+                break;
+            }
+
+        } catch (error: any) {
+            this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `Error: ${error.message}` });
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview) {
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat.js'));
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat.css'));
+
+        return `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link href="${styleUri}" rel="stylesheet">
+                <title>Ollama Agent</title>
+            </head>
+            <body>
+                <div id="chat-container">
+                    <div id="messages"></div>
+                    <div id="input-container">
+                        <textarea id="user-input" placeholder="Ask anything..."></textarea>
+                        <button id="send-button">Send</button>
+                    </div>
+                </div>
+                <script src="${scriptUri}"></script>
+            </body>
+            </html>`;
+    }
+}
