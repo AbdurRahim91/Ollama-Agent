@@ -98,13 +98,33 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
 
                 try {
                     let jsonStr = response.trim();
+                    
+                    // 1. Try to find JSON within triple backticks
                     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
                     if (jsonMatch) {
                         jsonStr = jsonMatch[1];
+                    } else {
+                        // 2. If no backticks, try to find the first '{' and last '}'
+                        const start = jsonStr.indexOf('{');
+                        const end = jsonStr.lastIndexOf('}');
+                        if (start !== -1 && end !== -1) {
+                            jsonStr = jsonStr.substring(start, end + 1);
+                        }
                     }
 
-                    const toolCall = JSON.parse(jsonStr);
-                    if (toolCall.tool) {
+                    // 3. Basic cleanup for common LLM JSON mistakes (like literal newlines)
+                    // We only want to escape newlines that are NOT already escaped
+                    // This is tricky, so we'll try parsing first, then fallback to cleanup
+                    let toolCall;
+                    try {
+                        toolCall = JSON.parse(jsonStr);
+                    } catch (err) {
+                        // Attempt to fix common literal newline issues in JSON strings
+                        const fixedJson = jsonStr.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+                        toolCall = JSON.parse(fixedJson);
+                    }
+
+                    if (toolCall && toolCall.tool) {
                         this._view.webview.postMessage({ type: 'addMessage', role: 'assistant', content: `[Tool] ${toolCall.tool}: ${JSON.stringify(toolCall.args)}` });
                         
                         let result: any;
