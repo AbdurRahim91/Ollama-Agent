@@ -29,26 +29,37 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
+        // Initial model fetch
+        this._ollamaClient.listModels().then(models => {
+            webviewView.webview.postMessage({ type: 'setModels', models });
+        });
+
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case 'sendMessage': {
-                    await this._handleUserMessage(data.value);
+                    await this._handleUserMessage(data.value, data.model);
+                    break;
+                }
+                case 'refreshModels': {
+                    const models = await this._ollamaClient.listModels();
+                    webviewView.webview.postMessage({ type: 'setModels', models });
                     break;
                 }
             }
         });
     }
 
-    private async _handleUserMessage(text: string) {
+    private async _handleUserMessage(text: string, selectedModel?: string) {
         if (!this._view) { return; }
 
         this._view.webview.postMessage({ type: 'addMessage', role: 'user', content: text });
 
         try {
             const models = await this._ollamaClient.listModels();
-            const model = models.includes('deepseek-coder-v2:16b') ? 'deepseek-coder-v2:16b' : 
+            const model = selectedModel || 
+                          (models.includes('deepseek-coder-v2:16b') ? 'deepseek-coder-v2:16b' : 
                           models.includes('llama3.1:8b') ? 'llama3.1:8b' : 
-                          models[0] || 'llama3';
+                          models[0] || 'llama3');
 
             const messages = [
                 { 
@@ -125,6 +136,12 @@ export class AgentWebviewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div id="chat-container">
+                    <div id="header">
+                        <select id="model-select">
+                            <option value="">Loading models...</option>
+                        </select>
+                        <button id="refresh-models" title="Refresh Models">↻</button>
+                    </div>
                     <div id="messages"></div>
                     <div id="input-container">
                         <textarea id="user-input" placeholder="Ask anything..."></textarea>
